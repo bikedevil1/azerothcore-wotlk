@@ -1,0 +1,30 @@
+name: Sync Upstream Repository
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # 每天UTC时间0点运行
+  workflow_dispatch:    # 允许手动触发
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Add upstream repository
+        run: |
+          git remote add upstream https://github.com/azerothcore/azerothcore-wotlk.git
+          git fetch upstream
+          
+      - name: Merge changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout master
+          git merge upstream/master --no-edit
+          
+      - name: Push changes
+        run: git push origin master
